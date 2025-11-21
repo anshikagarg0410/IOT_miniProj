@@ -1,6 +1,6 @@
 // ThingSpeak Configuration
 const CHANNEL_ID = '3175373';
-const READ_API_KEY = 'ZI1JL5YU6DRGVBOS';
+const READ_API_KEY = 'EAS2XWQS7DA4CJPZ';
 const THINGSPEAK_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${READ_API_KEY}&results=10`;
 
 // Create animated particles
@@ -34,6 +34,9 @@ async function fetchParkingData() {
             const slot1 = parseInt(latestData.field1) || 0;
             const slot2 = parseInt(latestData.field2) || 0;
             const slot3 = parseInt(latestData.field3) || 0;
+            // Field5 -> Ultrasonic Distance (cm)
+            const ultrasonicRaw = latestData.field5;
+            const ultrasonic = (ultrasonicRaw === null || ultrasonicRaw === undefined || ultrasonicRaw === '') ? null : parseFloat(ultrasonicRaw);
             
             const totalSlots = 3;
             const occupiedSlots = slot1 + slot2 + slot3;
@@ -41,6 +44,17 @@ async function fetchParkingData() {
             
             // Update UI
             document.getElementById('availableSlots').textContent = availableSlots;
+            // Update ultrasonic card (show cm or No reading)
+            const ultraEl = document.getElementById('ultraDistance');
+            const ultraTileEl = document.getElementById('ultraTileValue');
+            if (ultrasonic !== null && !isNaN(ultrasonic)) {
+                const display = `${ultrasonic} cm`;
+                if (ultraEl) ultraEl.textContent = display;
+                if (ultraTileEl) ultraTileEl.textContent = display;
+            } else {
+                if (ultraEl) ultraEl.textContent = 'No reading';
+                if (ultraTileEl) ultraTileEl.textContent = 'No reading';
+            }
             
             // Update parking visual
             updateParkingVisual([slot1, slot2, slot3]);
@@ -131,8 +145,8 @@ window.addEventListener('DOMContentLoaded', () => {
     fetchParkingData();
     predictAvailability();
     
-    // Update every 15 seconds (ThingSpeak free limit)
-    setInterval(fetchParkingData, 15000);
+    // Update every 10 seconds
+    setInterval(fetchParkingData, 10000);
     
     // Update prediction every 5 minutes
     setInterval(predictAvailability, 300000);

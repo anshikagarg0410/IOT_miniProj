@@ -186,6 +186,47 @@ body {
     margin: 0.5rem 0;
 }
 
+/* NEW: Ultrasonic specific styling */
+.stat-card.ultrasonic {
+    background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+}
+.stat-card.ultrasonic i {
+    color: #fff;
+}
+.stat-card.ultrasonic h3 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+/* NEW: Ultrasonic tile inside parking visual */
+.ultrasonic-tile {
+    margin-top: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.9rem;
+    background: rgba(59,130,246,0.12);
+    border: 1px solid rgba(99,102,241,0.12);
+    border-radius: 10px;
+    width: 220px;
+}
+.ultrasonic-tile i {
+    font-size: 1.4rem;
+    color: #60a5fa;
+}
+.ultrasonic-tile .ultra-text .label {
+    display: block;
+    font-size: 0.8rem;
+    color: rgba(248,250,252,0.8);
+}
+.ultrasonic-tile .ultra-text .value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+}
+
 /* CTA Button */
 .cta-button {
     display: inline-flex;

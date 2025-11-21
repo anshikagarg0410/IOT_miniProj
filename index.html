@@ -46,6 +46,12 @@
                     <h3>40%</h3>
                     <p>CO₂ Reduction</p>
                 </div>
+                <!-- NEW: Ultrasonic Distance Card -->
+                <div class="stat-card ultrasonic">
+                    <i class="fas fa-ruler"></i>
+                    <h3 id="ultraDistance">No reading</h3>
+                    <p>Ultrasonic Distance</p>
+                </div>
             </div>
             <a href="dashboard.html" class="cta-button">
                 <span>Find Parking Now</span>
@@ -63,6 +69,14 @@
             </div>
             <div class="parking-slot" data-slot="3">
                 <div class="car"></div>
+            </div>
+            <!-- NEW: Ultrasonic Tile inside slot section -->
+            <div class="ultrasonic-tile">
+                <i class="fas fa-ruler"></i>
+                <div class="ultra-text">
+                    <span class="label">Distance</span>
+                    <span class="value" id="ultraTileValue">No reading</span>
+                </div>
             </div>
         </div>
     </section>
