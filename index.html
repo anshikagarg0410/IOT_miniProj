@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPark - Intelligent Parking System</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-parking"></i>
+                <span>SmartPark</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#features" class="nav-link">Features</a></li>
+                <li><a href="dashboard.html" class="nav-link cta-btn">Dashboard</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="particles" id="particles"></div>
+        <div class="hero-content">
+            <h1 class="glitch" data-text="Never Circle Again">Never Circle Again</h1>
+            <p class="hero-subtitle">AI-Powered Smart Parking for the Future</p>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <i class="fas fa-car-side"></i>
+                    <h3 id="availableSlots">--</h3>
+                    <p>Available Slots</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-clock"></i>
+                    <h3>2.3 mins</h3>
+                    <p>Avg. Find Time</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-leaf"></i>
+                    <h3>40%</h3>
+                    <p>CO₂ Reduction</p>
+                </div>
+            </div>
+            <a href="dashboard.html" class="cta-button">
+                <span>Find Parking Now</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <!-- 3D Parking Lot Animation -->
+        <div class="parking-visual">
+            <div class="parking-slot" data-slot="1">
+                <div class="car"></div>
+            </div>
+            <div class="parking-slot" data-slot="2">
+                <div class="car occupied"></div>
+            </div>
+            <div class="parking-slot" data-slot="3">
+                <div class="car"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <h2 class="section-title">Intelligent Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon-box">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3>Predictive AI</h3>
+                <p>78% accuracy in predicting parking availability 24 hours ahead</p>
+                <div class="feature-badge">Live</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="icon-box">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3>Real-time Updates</h3>
+                <p>IoT sensors with MQTT protocol for instant slot updates</p>
+                <div class="feature-badge">IoT</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="icon-box">
+                    <i class="fas fa-charging-station"></i>
+                </div>
+                <h3>EV Charging</h3>
+                <p>Wireless charging stations for electric vehicles</p>
+                <div class="feature-badge">Green</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="icon-box">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Dynamic Pricing</h3>
+                <p>Smart demand-based pricing algorithm</p>
+                <div class="feature-badge">Smart</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prediction Showcase -->
+    <section class="prediction-section">
+        <div class="prediction-container">
+            <h2>AI Prediction Engine</h2>
+            <div class="prediction-box">
+                <div class="prediction-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="prediction-content">
+                    <h3 id="predictionText">Loading prediction...</h3>
+                    <p>Based on historical data, weather, and events</p>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="confidenceFill"></div>
+                    </div>
+                    <span class="confidence-label" id="confidenceLabel">Confidence: --</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>

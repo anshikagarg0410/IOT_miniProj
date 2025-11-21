@@ -1,0 +1,444 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #0f172a;
+    color: #f8fafc;
+    overflow-x: hidden;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background: #1e293b;
+    padding: 2rem 1rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    color: #ec4899;
+}
+
+.sidebar .logo i {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    color: #94a3b8;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.sidebar nav a:hover,
+.sidebar nav a.active {
+    background: #334155;
+    color: #ec4899;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    max-width: calc(100vw - 250px);
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+header h1 {
+    font-size: 2rem;
+}
+
+.live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(16, 185, 129, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    color: #10b981;
+    font-weight: 600;
+}
+
+.pulse {
+    width: 10px;
+    height: 10px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+}
+
+/* Stats Grid */
+.stats-grid {
+    /* NEW: enforce 4 columns on desktop, wrap on smaller screens */
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* NEW: Gas stat box gradients (will be switched dynamically via JS) */
+.stat-box.gas-box {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+/* NEW: Gas Alert Banner */
+.gas-alert-banner {
+    display: none; /* shown via JS */
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.15);
+    animation: none;
+}
+.gas-alert-banner.show {
+    display: block;
+}
+.gas-alert-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(90deg, rgba(239,68,68,0.95), rgba(220,38,38,0.95));
+    color: #fff;
+    animation: pulseAlert 1.2s infinite ease-in-out;
+}
+.gas-alert-message {
+    font-weight: 700;
+}
+.gas-alert-close {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+@keyframes pulseAlert {
+    0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.0); }
+    50% { box-shadow: 0 0 30px 6px rgba(239,68,68,0.12); }
+    100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.0); }
+}
+
+/* NEW: Gas Chart container styling */
+#gasChartContainer {
+    margin-top: 1.5rem;
+    background: #1e293b;
+    padding: 1.5rem;
+    border-radius: 20px;
+    height: 320px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+#gasChartContainer h2 { color: #ec4899; margin-bottom: 1rem; }
+
+/* NEW: Gas Monitoring Section */
+.gas-monitoring {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 2rem;
+}
+.gas-gauge-card {
+    width: 300px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1.25rem;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+.gauge-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+.gauge { width: 220px; height: 220px; }
+.gauge-status {
+    margin-top: 0.75rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+/* Smooth transitions and responsive adjustments */
+.stat-box, .chart-container, .slot-card, .gas-gauge-card {
+    transition: all 0.3s ease;
+}
+
+/* Mobile adjustments: stats 2 columns, preserve responsive behavior */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    #gasChartContainer {
+        height: 260px;
+        padding: 1rem;
+    }
+
+    .gas-gauge-card { width: 100%; max-width: 320px; }
+}
+
+.stat-box {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1.5rem;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.stat-box:hover {
+    transform: translateY(-5px);
+}
+
+.stat-box.available {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.stat-box.occupied {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.stat-box i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-box h3 {
+    font-size: 2.5rem;
+    margin: 0.5rem 0;
+    font-weight: 700;
+}
+
+.stat-box p {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Chart Wrapper - PREVENTS INFINITE SCROLL */
+.chart-wrapper {
+    margin-bottom: 2rem;
+    max-height: 450px;
+    overflow: hidden;
+}
+
+.chart-container {
+    background: #1e293b;
+    padding: 2rem;
+    border-radius: 20px;
+    height: 420px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.chart-container h2 {
+    margin-bottom: 1rem;
+    color: #ec4899;
+    font-size: 1.5rem;
+}
+
+.chart-box {
+    position: relative;
+    height: 320px;
+    width: 100%;
+}
+
+.chart-box canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 320px !important;
+}
+
+/* Slots Grid */
+.slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+}
+
+.slot-card {
+    background: #1e293b;
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.slot-card:hover {
+    transform: scale(1.05);
+}
+
+.slot-card.free {
+    border-color: #10b981;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+}
+
+.slot-card.occupied {
+    border-color: #ef4444;
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+}
+
+.slot-visual {
+    width: 100%;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed #64748b;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.slot-visual::after {
+    content: '🚗';
+    font-size: 3rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.slot-card.occupied .slot-visual {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
+
+.slot-card.free .slot-visual {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: #10b981;
+}
+
+.slot-card.occupied .slot-visual::after {
+    opacity: 1;
+}
+
+.slot-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.status {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.slot-card.free .status {
+    color: #10b981;
+}
+
+.slot-card.occupied .status {
+    color: #ef4444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+    
+    .main-content {
+        max-width: 100%;
+        padding: 1rem;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .chart-wrapper {
+        max-height: 350px;
+    }
+    
+    .chart-container {
+        height: 320px;
+        padding: 1rem;
+    }
+    
+    .chart-box {
+        height: 240px;
+    }
+    
+    .chart-box canvas {
+        max-height: 240px !important;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .slots-grid {
+        grid-template-columns: 1fr;
+    }
+}
