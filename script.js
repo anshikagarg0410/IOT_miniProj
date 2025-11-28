@@ -6,16 +6,45 @@ const THINGSPEAK_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.
 // Create animated particles
 function createParticles() {
     const particlesContainer = document.getElementById('particles');
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 80; i++) {
         const particle = document.createElement('div');
         particle.style.position = 'absolute';
-        particle.style.width = Math.random() * 5 + 'px';
-        particle.style.height = particle.style.width;
-        particle.style.background = 'rgba(255, 255, 255, 0.5)';
+        
+        // Random size between 1px and 4px (smaller for cleaner look)
+        const size = Math.random() * 3 + 1;
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        
+        // White glossy effect
+        particle.style.background = `radial-gradient(circle at 30% 30%, 
+            rgba(255, 255, 255, 1) 0%, 
+            rgba(255, 255, 255, 0.8) 30%, 
+            rgba(255, 255, 255, 0.5) 60%, 
+            rgba(255, 255, 255, 0.2) 100%)`;
+        
         particle.style.borderRadius = '50%';
-        particle.style.top = Math.random() * 100 + '%';
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.animation = `float ${Math.random() * 10 + 5}s linear infinite`;
+        particle.style.boxShadow = `
+            0 0 ${size}px rgba(255, 255, 255, 0.6),
+            0 0 ${size * 2}px rgba(255, 255, 255, 0.3),
+            inset 0 0 ${size/2}px rgba(255, 255, 255, 0.9)
+        `;
+        
+        // Wider spread with more horizontal movement
+        particle.style.top = Math.random() * 120 - 10 + '%'; // -10% to 110%
+        particle.style.left = Math.random() * 140 - 20 + '%'; // -20% to 120%
+        
+        // Faster animation for more movement
+        const duration = Math.random() * 15 + 8; // 8-23 seconds
+        const delay = Math.random() * 6; // 0-6 seconds delay
+        particle.style.animation = `float ${duration}s linear infinite`;
+        particle.style.animationDelay = `${delay}s`;
+        
+        // Add subtle pulsing effect
+        particle.style.animation += `, pulse ${Math.random() * 3 + 1}s ease-in-out infinite`;
+        
+        // Add slight horizontal drift
+        particle.style.animation += `, drift ${Math.random() * 10 + 5}s ease-in-out infinite`;
+        
         particlesContainer.appendChild(particle);
     }
 }

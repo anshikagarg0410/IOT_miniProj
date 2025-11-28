@@ -100,8 +100,8 @@ function initChart() {
     
     // Create gradient for fill
     const gradientFill = ctx.createLinearGradient(0, 0, 0, 400);
-    gradientFill.addColorStop(0, 'rgba(255, 78, 198, 0.3)');
-    gradientFill.addColorStop(1, 'rgba(255, 78, 198, 0)');
+    gradientFill.addColorStop(0, 'rgba(255, 208, 0, 0.3)');
+    gradientFill.addColorStop(1, 'rgba(255, 208, 0, 0)');
     
     occupancyChart = new Chart(ctx, {
         type: 'line',
@@ -110,15 +110,15 @@ function initChart() {
             datasets: [{
                 label: 'Occupancy Rate (%)',
                 data: [],
-                borderColor: '#ff4ec6', // Neon pink/magenta
+                borderColor: '#FFD000', // Yellow accent
                 backgroundColor: gradientFill,
                 borderWidth: 3,
                 tension: 0.4, // Smooth curve
                 fill: true,
                 pointRadius: 5,
                 pointHoverRadius: 7,
-                pointBackgroundColor: '#ff4ec6',
-                pointBorderColor: '#fff',
+                pointBackgroundColor: '#FFD000',
+                pointBorderColor: '#000000',
                 pointBorderWidth: 2,
                 segment: {
                     borderColor: ctx => {
@@ -140,7 +140,7 @@ function initChart() {
                     display: true,
                     position: 'top',
                     labels: {
-                        color: '#f8fafc',
+                        color: '#FFFFFF',
                         font: {
                             size: 12,
                             family: 'Poppins',
@@ -151,11 +151,11 @@ function initChart() {
                     }
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                    titleColor: '#ff4ec6',
+                    backgroundColor: 'rgba(13, 13, 13, 0.95)',
+                    titleColor: '#FFD000',
                     titleFont: { size: 13, weight: 'bold' },
-                    bodyColor: '#f8fafc',
-                    borderColor: '#ff4ec6',
+                    bodyColor: '#FFFFFF',
+                    borderColor: '#FFD000',
                     borderWidth: 2,
                     padding: 12,
                     displayColors: true,
@@ -175,7 +175,7 @@ function initChart() {
                     beginAtZero: true,
                     max: 100,
                     ticks: {
-                        color: '#94a3b8',
+                        color: '#FFFFFF',
                         font: {
                             size: 11,
                             family: 'Poppins'
@@ -186,14 +186,14 @@ function initChart() {
                         }
                     },
                     grid: {
-                        color: 'rgba(148, 163, 184, 0.1)',
+                        color: 'rgba(255, 255, 255, 0.1)',
                         drawBorder: false,
                         lineWidth: 1
                     }
                 },
                 x: {
                     ticks: {
-                        color: '#94a3b8',
+                        color: '#FFFFFF',
                         font: {
                             size: 10,
                             family: 'Poppins'
@@ -202,7 +202,7 @@ function initChart() {
                         minRotation: 0
                     },
                     grid: {
-                        color: 'rgba(148, 163, 184, 0.05)',
+                        color: 'rgba(255, 255, 255, 0.05)',
                         drawBorder: false
                     }
                 }
@@ -270,9 +270,9 @@ function initGasChart() {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: 'rgba(30,41,59,0.95)',
-                    titleColor: '#f8fafc',
-                    bodyColor: '#f8fafc'
+                    backgroundColor: 'rgba(13, 13, 13, 0.95)',
+                    titleColor: '#FFFFFF',
+                    bodyColor: '#FFFFFF'
                 }
             },
             scales: {
@@ -280,10 +280,10 @@ function initGasChart() {
                     beginAtZero: true,
                     min: 0,
                     max: 500,
-                    ticks: { color: '#94a3b8' },
-                    grid: { color: 'rgba(148,163,184,0.08)' }
+                    ticks: { color: '#FFFFFF' },
+                    grid: { color: 'rgba(255,255,255,0.08)' }
                 },
-                x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                x: { ticks: { color: '#FFFFFF' }, grid: { display: false } }
             }
         }
     });

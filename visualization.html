@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPark - Parking Visualization</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-parking"></i>
+                <span>SmartPark</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="visualization.html" class="nav-link active">Visualization</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Visualization Section -->
+    <section class="visualization-section">
+        <div class="container">
+            <header class="section-header">
+                <h1>Parking Layout Visualization</h1>
+                <div class="live-indicator">
+                    <span class="pulse"></span> Live
+                </div>
+            </header>
+
+            <!-- Gate Status Card -->
+            <div class="gate-status-card">
+                <div class="gate-header">
+                    <i class="fas fa-door-open"></i>
+                    <h3>Gate Status</h3>
+                </div>
+                <div class="gate-indicator" id="gateIndicator">
+                    <span class="gate-status-text" id="gateStatusText">Closed</span>
+                    <div class="gate-light" id="gateLight"></div>
+                </div>
+            </div>
+
+            <!-- Parking Layout -->
+            <div class="parking-layout">
+                <div class="layout-header">
+                    <h2>Real-time Slot Status</h2>
+                    <div class="legend">
+                        <div class="legend-item available">
+                            <span class="legend-dot"></span>
+                            <span>Available</span>
+                        </div>
+                        <div class="legend-item occupied">
+                            <span class="legend-dot"></span>
+                            <span>Occupied</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="parking-grid">
+                    <div class="parking-slot" id="slot-viz-1">
+                        <div class="slot-number">1</div>
+                        <div class="slot-indicator" id="indicator-1">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <div class="slot-status">Checking...</div>
+                    </div>
+
+                    <div class="parking-slot" id="slot-viz-2">
+                        <div class="slot-number">2</div>
+                        <div class="slot-indicator" id="indicator-2">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <div class="slot-status">Checking...</div>
+                    </div>
+
+                    <div class="parking-slot" id="slot-viz-3">
+                        <div class="slot-number">3</div>
+                        <div class="slot-indicator" id="indicator-3">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <div class="slot-status">Checking...</div>
+                    </div>
+                </div>
+
+                <!-- Statistics Summary -->
+                <div class="stats-summary">
+                    <div class="summary-card">
+                        <i class="fas fa-chart-pie"></i>
+                        <div class="summary-content">
+                            <h4 id="occupancySummary">--%</h4>
+                            <p>Current Occupancy</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <i class="fas fa-clock"></i>
+                        <div class="summary-content">
+                            <h4 id="lastUpdate">--:--</h4>
+                            <p>Last Update</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="visualization.js"></script>
+</body>
+</html>
