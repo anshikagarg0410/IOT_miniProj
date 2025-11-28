@@ -1,17 +1,107 @@
-// ThingSpeak Configuration
+// ============================================================================
+// THINGSPEAK CONFIGURATION
+// ============================================================================
 const CHANNEL_ID = '3175373';
 const READ_API_KEY = 'ZI1JL5YU6DRGVBOS';
- // Replace with your actual read API key
 const THINGSPEAK_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${READ_API_KEY}&results=20`;
 
-// Chart.js instance
+// ============================================================================
+// STORAGE CONFIGURATION
+// ============================================================================
+const OCCUPANCY_HISTORY_KEY = 'smartpark_occupancy_history';
+const MAX_HISTORY_POINTS = 800; // ~24 hours with 2-min intervals
+const HISTORY_RETENTION_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+// ============================================================================
+// CHART INSTANCES
+// ============================================================================
 let occupancyChart;
-// NEW: Gas chart instance
 let gasChart;
 
-// Initialize Chart with fixed height
+// ============================================================================
+// OCCUPANCY HISTORY MANAGEMENT (localStorage)
+// ============================================================================
+
+/**
+ * Get all occupancy history from localStorage
+ */
+function getOccupancyHistory() {
+    try {
+        const data = localStorage.getItem(OCCUPANCY_HISTORY_KEY);
+        return data ? JSON.parse(data) : [];
+    } catch (error) {
+        console.error('Error reading occupancy history:', error);
+        return [];
+    }
+}
+
+/**
+ * Save occupancy history to localStorage
+ */
+function saveOccupancyHistory(history) {
+    try {
+        localStorage.setItem(OCCUPANCY_HISTORY_KEY, JSON.stringify(history));
+    } catch (error) {
+        console.error('Error saving occupancy history:', error);
+    }
+}
+
+/**
+ * Add new occupancy record and prune old data
+ */
+function addOccupancyRecord(occupancyPercent) {
+    let history = getOccupancyHistory();
+    const now = new Date();
+    
+    // Create new record
+    const record = {
+        timestamp: now.toISOString(),
+        occupancy: occupancyPercent,
+        time: now.getTime()
+    };
+    
+    // Add record
+    history.push(record);
+    
+    // Prune old records (older than 24 hours)
+    const cutoffTime = now.getTime() - HISTORY_RETENTION_MS;
+    history = history.filter(r => r.time >= cutoffTime);
+    
+    // Limit to max points
+    if (history.length > MAX_HISTORY_POINTS) {
+        history = history.slice(-MAX_HISTORY_POINTS);
+    }
+    
+    saveOccupancyHistory(history);
+    return history;
+}
+
+/**
+ * Format timestamp for chart label (12-hour format)
+ */
+function formatTimeLabel(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+}
+
+// ============================================================================
+// CHART INITIALIZATION & UPDATES
+// ============================================================================
+
+/**
+ * Initialize Occupancy Chart with improved styling
+ */
 function initChart() {
     const ctx = document.getElementById('occupancyChart').getContext('2d');
+    
+    // Create gradient for fill
+    const gradientFill = ctx.createLinearGradient(0, 0, 0, 400);
+    gradientFill.addColorStop(0, 'rgba(255, 78, 198, 0.3)');
+    gradientFill.addColorStop(1, 'rgba(255, 78, 198, 0)');
     
     occupancyChart = new Chart(ctx, {
         type: 'line',
@@ -20,21 +110,31 @@ function initChart() {
             datasets: [{
                 label: 'Occupancy Rate (%)',
                 data: [],
-                borderColor: '#ec4899',
-                backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                borderColor: '#ff4ec6', // Neon pink/magenta
+                backgroundColor: gradientFill,
                 borderWidth: 3,
-                tension: 0.4,
+                tension: 0.4, // Smooth curve
                 fill: true,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                pointBackgroundColor: '#ec4899',
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: '#ff4ec6',
                 pointBorderColor: '#fff',
-                pointBorderWidth: 2
+                pointBorderWidth: 2,
+                segment: {
+                    borderColor: ctx => {
+                        // Gradient effect on line
+                        return '#ff4ec6';
+                    }
+                }
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false, // Important for fixed height
+            maintainAspectRatio: false,
+            animation: {
+                duration: 750,
+                easing: 'easeInOutQuart'
+            },
             plugins: {
                 legend: {
                     display: true,
@@ -43,18 +143,31 @@ function initChart() {
                         color: '#f8fafc',
                         font: {
                             size: 12,
-                            family: 'Poppins'
-                        }
+                            family: 'Poppins',
+                            weight: '600'
+                        },
+                        padding: 15,
+                        usePointStyle: true
                     }
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(30, 41, 59, 0.9)',
-                    titleColor: '#f8fafc',
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    titleColor: '#ff4ec6',
+                    titleFont: { size: 13, weight: 'bold' },
                     bodyColor: '#f8fafc',
-                    borderColor: '#ec4899',
-                    borderWidth: 1,
+                    borderColor: '#ff4ec6',
+                    borderWidth: 2,
                     padding: 12,
-                    displayColors: false
+                    displayColors: true,
+                    boxPadding: 8,
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.y + '%';
+                        }
+                    }
+                },
+                filler: {
+                    propagate: true
                 }
             },
             scales: {
@@ -63,6 +176,10 @@ function initChart() {
                     max: 100,
                     ticks: {
                         color: '#94a3b8',
+                        font: {
+                            size: 11,
+                            family: 'Poppins'
+                        },
                         stepSize: 20,
                         callback: function(value) {
                             return value + '%';
@@ -70,17 +187,22 @@ function initChart() {
                     },
                     grid: {
                         color: 'rgba(148, 163, 184, 0.1)',
-                        drawBorder: false
+                        drawBorder: false,
+                        lineWidth: 1
                     }
                 },
                 x: {
                     ticks: {
                         color: '#94a3b8',
+                        font: {
+                            size: 10,
+                            family: 'Poppins'
+                        },
                         maxRotation: 45,
                         minRotation: 0
                     },
                     grid: {
-                        color: 'rgba(148, 163, 184, 0.1)',
+                        color: 'rgba(148, 163, 184, 0.05)',
                         drawBorder: false
                     }
                 }
@@ -89,27 +211,50 @@ function initChart() {
     });
 }
 
-// NEW: Initialize Gas Chart
+/**
+ * Update occupancy chart with history data (smart downsampling for long history)
+ */
+function updateOccupancyChart() {
+    let history = getOccupancyHistory();
+    
+    if (history.length === 0) return;
+    
+    // Downsample if too many points (for performance)
+    let displayData = history;
+    if (history.length > 100) {
+        const step = Math.ceil(history.length / 100);
+        displayData = history.filter((_, i) => i % step === 0);
+    }
+    
+    const labels = displayData.map(r => formatTimeLabel(r.timestamp));
+    const occupancyData = displayData.map(r => r.occupancy);
+    
+    // Update chart with fade animation
+    occupancyChart.data.labels = labels;
+    occupancyChart.data.datasets[0].data = occupancyData;
+    occupancyChart.update('none');
+}
+
+
+/**
+ * Initialize Gas Chart
+ */
 function initGasChart() {
     const ctx = document.getElementById('gasChart').getContext('2d');
-
-    // sample gas data
-    const sampleData = [50, 75, 90, 110, 95, 80, 120, 85, 70, 65];
-    const labels = sampleData.map((_, i) => `T-${sampleData.length - i}`);
-
-    // create gradient for the line (left=green, right=red)
+    
+    // Create gradient for line
     const gradient = ctx.createLinearGradient(0, 0, 600, 0);
     gradient.addColorStop(0, '#10b981');
     gradient.addColorStop(0.5, '#f59e0b');
     gradient.addColorStop(1, '#ef4444');
-
+    
     gasChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
+            labels: [],
             datasets: [{
                 label: 'Gas (PPM)',
-                data: sampleData,
+                data: [],
                 borderColor: gradient,
                 backgroundColor: 'rgba(16,185,129,0.06)',
                 borderWidth: 3,
@@ -124,9 +269,6 @@ function initGasChart() {
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
-                title: {
-                    display: false
-                },
                 tooltip: {
                     backgroundColor: 'rgba(30,41,59,0.95)',
                     titleColor: '#f8fafc',
@@ -147,7 +289,13 @@ function initGasChart() {
     });
 }
 
-// NEW: Update Gas Level (updates stat box, gauge and possible alert)
+// ============================================================================
+// GAS SENSOR MANAGEMENT
+// ============================================================================
+
+/**
+ * Update gas level display and status
+ */
 function updateGasLevel(ppm) {
     const gasPPMEl = document.getElementById('gasPPM');
     const gasBox = document.getElementById('gasStatBox');
@@ -155,50 +303,52 @@ function updateGasLevel(ppm) {
     const gaugeProgress = document.getElementById('gaugeProgress');
     const gaugeStatus = document.getElementById('gaugeStatus');
 
-    // Display value
     gasPPMEl.textContent = `${ppm} PPM`;
     gaugeValue.textContent = `${ppm} PPM`;
 
-    // Determine gradient/background and status
     if (ppm <= 100) {
-        // Good
         gasBox.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
         gaugeProgress.setAttribute('stroke', '#10b981');
         gaugeStatus.textContent = 'Safe';
     } else if (ppm <= 300) {
-        // Moderate
         gasBox.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
         gaugeProgress.setAttribute('stroke', '#f59e0b');
         gaugeStatus.textContent = 'Caution';
     } else {
-        // Hazardous
         gasBox.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
         gaugeProgress.setAttribute('stroke', '#ef4444');
         gaugeStatus.textContent = 'Danger';
     }
 
-    // Update circular progress: max 500 PPM
     const max = 500;
     const pct = Math.min(ppm / max, 1);
-    const radius = 44; // from SVG r
+    const radius = 44;
     const circumference = 2 * Math.PI * radius;
     const dash = circumference * pct;
     gaugeProgress.setAttribute('stroke-dasharray', `${dash} ${circumference}`);
 
-    // Alert handling
     if (ppm > 300) {
         showGasAlert();
+    } else {
+        hideGasAlert();
     }
 }
 
-// NEW: Show/Hide Alert
+/**
+ * Show gas alert banner
+ */
 function showGasAlert() {
     const banner = document.getElementById('gasAlert');
     if (!banner) return;
-    banner.classList.add('show');
-    banner.style.display = 'block';
+    if (!banner.classList.contains('show')) {
+        banner.classList.add('show');
+        banner.style.display = 'block';
+    }
 }
 
+/**
+ * Hide gas alert banner
+ */
 function hideGasAlert() {
     const banner = document.getElementById('gasAlert');
     if (!banner) return;
@@ -206,7 +356,13 @@ function hideGasAlert() {
     banner.style.display = 'none';
 }
 
-// Fetch and update dashboard data
+// ============================================================================
+// DASHBOARD DATA UPDATES
+// ============================================================================
+
+/**
+ * Fetch and update all dashboard data from ThingSpeak
+ */
 async function updateDashboard() {
     try {
         const response = await fetch(THINGSPEAK_URL);
@@ -215,12 +371,12 @@ async function updateDashboard() {
         if (data.feeds && data.feeds.length > 0) {
             const latestData = data.feeds[data.feeds.length - 1];
             
-            // Parse slot data (0 = free, 1 = occupied)
+            // Parse slot data
             const slot1 = parseInt(latestData.field1) || 0;
             const slot2 = parseInt(latestData.field2) || 0;
             const slot3 = parseInt(latestData.field3) || 0;
             
-            // NEW: Parse gas sensor data from Field4
+            // Parse gas data
             const gasRaw = latestData.field4;
             const gasPPM = (gasRaw === null || gasRaw === undefined || gasRaw === '') ? null : parseFloat(gasRaw);
             
@@ -229,24 +385,31 @@ async function updateDashboard() {
             const availableSlots = totalSlots - occupiedSlots;
             const occupancyRate = Math.round((occupiedSlots / totalSlots) * 100);
             
-            // Update stats with animation
+            // Update stats
             animateValue('totalSlots', 0, totalSlots, 500);
             animateValue('availableSlots', 0, availableSlots, 500);
             animateValue('occupiedSlots', 0, occupiedSlots, 500);
             document.getElementById('occupancyRate').textContent = occupancyRate + '%';
             
-            // Update individual slots
+            // Update slot cards
             updateSlotCard('slot1', slot1);
             updateSlotCard('slot2', slot2);
             updateSlotCard('slot3', slot3);
             
-            // NEW: Update gas level if valid data exists
+            // Add occupancy record to history and update chart
+            addOccupancyRecord(occupancyRate);
+            updateOccupancyChart();
+            
+            // Update gas sensor
             if (gasPPM !== null && !isNaN(gasPPM)) {
                 updateGasLevel(gasPPM);
-                // Add to gas chart if changed
-                if (gasChart && gasChart.data.datasets[0].data.length > 0) {
-                    const lastVal = gasChart.data.datasets[0].data[gasChart.data.datasets[0].data.length - 1];
-                    if (lastVal !== gasPPM) {
+                // Add to gas chart - add first data point or if value changed
+                if (gasChart) {
+                    const lastVal = gasChart.data.datasets[0].data.length > 0 
+                        ? gasChart.data.datasets[0].data[gasChart.data.datasets[0].data.length - 1] 
+                        : null;
+                    
+                    if (lastVal === null || lastVal !== gasPPM) {
                         gasChart.data.labels.push(new Date().toLocaleTimeString());
                         gasChart.data.datasets[0].data.push(gasPPM);
                         if (gasChart.data.datasets[0].data.length > 20) {
@@ -257,9 +420,6 @@ async function updateDashboard() {
                     }
                 }
             }
-            
-            // Update chart
-            updateChart(data.feeds);
         }
     } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -269,7 +429,9 @@ async function updateDashboard() {
     }
 }
 
-// Animate number counting
+/**
+ * Animate number counter
+ */
 function animateValue(id, start, end, duration) {
     const element = document.getElementById(id);
     const range = end - start;
@@ -286,12 +448,13 @@ function animateValue(id, start, end, duration) {
     }, 16);
 }
 
-// Update individual slot card
+/**
+ * Update slot card status
+ */
 function updateSlotCard(slotId, status) {
     const slotCard = document.getElementById(slotId);
     const statusElement = slotCard.querySelector('.status');
     
-    // Remove existing classes
     slotCard.classList.remove('free', 'occupied');
     
     if (status === 0) {
@@ -303,50 +466,34 @@ function updateSlotCard(slotId, status) {
     }
 }
 
-// Update chart with historical data
-function updateChart(feeds) {
-    const labels = [];
-    const occupancyData = [];
-    
-    // Take last 10 readings
-    const recentFeeds = feeds.slice(-10);
-    
-    recentFeeds.forEach(feed => {
-        const timestamp = new Date(feed.created_at);
-        const timeLabel = timestamp.toLocaleTimeString('en-IN', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
-        
-        const slot1 = parseInt(feed.field1) || 0;
-        const slot2 = parseInt(feed.field2) || 0;
-        const slot3 = parseInt(feed.field3) || 0;
-        
-        const occupiedCount = slot1 + slot2 + slot3;
-        const occupancyPercent = Math.round((occupiedCount / 3) * 100);
-        
-        labels.push(timeLabel);
-        occupancyData.push(occupancyPercent);
-    });
-    
-    // Update chart data
-    occupancyChart.data.labels = labels;
-    occupancyChart.data.datasets[0].data = occupancyData;
-    occupancyChart.update('none'); // Disable animation for smoother updates
-}
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
 
-// Initialize on page load
+/**
+ * Initialize dashboard on page load
+ */
 window.addEventListener('DOMContentLoaded', () => {
     console.log('Dashboard initialized');
-    initChart();
-    // NEW: initialize gas chart and default gas UI
-    initGasChart();
-    updateDashboard(); // Fetch all data including gas from ThingSpeak
     
-    // Update every 15 seconds (ThingSpeak free tier limit)
-    setInterval(updateDashboard, 15000);
-
-    // NEW: Alert close button
+    // Initialize charts
+    initChart();
+    initGasChart();
+    
+    // Load and display stored occupancy history
+    updateOccupancyChart();
+    
+    // Fetch latest data from ThingSpeak
+    updateDashboard();
+    
+    // Set up auto-refresh (every 20 seconds to match Arduino upload rate)
+    setInterval(updateDashboard, 20000);
+    
+    // Setup gas alert close button
     const closeBtn = document.getElementById('gasAlertClose');
-    if (closeBtn) closeBtn.addEventListener('click', hideGasAlert);
+    if (closeBtn) {
+        closeBtn.addEventListener('click', hideGasAlert);
+    }
+    
+    console.log('Dashboard loaded with occupancy history support');
 });

@@ -276,28 +276,49 @@ header h1 {
 /* Chart Wrapper - PREVENTS INFINITE SCROLL */
 .chart-wrapper {
     margin-bottom: 2rem;
-    max-height: 450px;
+    max-height: 900px;
     overflow: hidden;
 }
 
 .chart-container {
-    background: #1e293b;
-    padding: 2rem;
-    border-radius: 20px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    padding: 2.5rem;
+    border-radius: 25px;
     height: 420px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .chart-container h2 {
-    margin-bottom: 1rem;
-    color: #ec4899;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #ff4ec6 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
 .chart-box {
     position: relative;
     height: 320px;
     width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 .chart-box canvas {
