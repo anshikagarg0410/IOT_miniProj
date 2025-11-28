@@ -220,6 +220,10 @@ async function updateDashboard() {
             const slot2 = parseInt(latestData.field2) || 0;
             const slot3 = parseInt(latestData.field3) || 0;
             
+            // NEW: Parse gas sensor data from Field4
+            const gasRaw = latestData.field4;
+            const gasPPM = (gasRaw === null || gasRaw === undefined || gasRaw === '') ? null : parseFloat(gasRaw);
+            
             const totalSlots = 3;
             const occupiedSlots = slot1 + slot2 + slot3;
             const availableSlots = totalSlots - occupiedSlots;
@@ -235,6 +239,24 @@ async function updateDashboard() {
             updateSlotCard('slot1', slot1);
             updateSlotCard('slot2', slot2);
             updateSlotCard('slot3', slot3);
+            
+            // NEW: Update gas level if valid data exists
+            if (gasPPM !== null && !isNaN(gasPPM)) {
+                updateGasLevel(gasPPM);
+                // Add to gas chart if changed
+                if (gasChart && gasChart.data.datasets[0].data.length > 0) {
+                    const lastVal = gasChart.data.datasets[0].data[gasChart.data.datasets[0].data.length - 1];
+                    if (lastVal !== gasPPM) {
+                        gasChart.data.labels.push(new Date().toLocaleTimeString());
+                        gasChart.data.datasets[0].data.push(gasPPM);
+                        if (gasChart.data.datasets[0].data.length > 20) {
+                            gasChart.data.datasets[0].data.shift();
+                            gasChart.data.labels.shift();
+                        }
+                        gasChart.update();
+                    }
+                }
+            }
             
             // Update chart
             updateChart(data.feeds);
@@ -319,34 +341,10 @@ window.addEventListener('DOMContentLoaded', () => {
     initChart();
     // NEW: initialize gas chart and default gas UI
     initGasChart();
-    updateGasLevel(85); // sample initial value
-    updateDashboard();
+    updateDashboard(); // Fetch all data including gas from ThingSpeak
     
     // Update every 15 seconds (ThingSpeak free tier limit)
     setInterval(updateDashboard, 15000);
-
-    // NEW: Simulate gas sensor changes every 3 seconds
-    setInterval(() => {
-        // Simple simulation: random walk around 85 with occasional spikes
-        const base = 85;
-        const spike = Math.random() < 0.08 ? (200 + Math.floor(Math.random() * 200)) : 0;
-        const variance = Math.floor((Math.random() - 0.5) * 40);
-        const newVal = Math.max(0, base + variance + spike);
-
-        // update gas UI
-        updateGasLevel(newVal);
-
-        // push into gasChart dataset (keep last 20)
-        if (gasChart) {
-            gasChart.data.labels.push(new Date().toLocaleTimeString());
-            gasChart.data.datasets[0].data.push(newVal);
-            if (gasChart.data.datasets[0].data.length > 20) {
-                gasChart.data.datasets[0].data.shift();
-                gasChart.data.labels.shift();
-            }
-            gasChart.update();
-        }
-    }, 3000);
 
     // NEW: Alert close button
     const closeBtn = document.getElementById('gasAlertClose');
