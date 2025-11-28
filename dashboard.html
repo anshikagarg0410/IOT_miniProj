@@ -83,6 +83,23 @@
                 </div>
             </div>
 
+            <!-- AI Prediction Engine (inserted) -->
+            <div class="chart-container prediction-card" id="predictionCard">
+                <h2>Predicted Occupancy (Next 10 Minutes)</h2>
+                <div class="prediction-body">
+                    <div class="prediction-left">
+                        <div class="prediction-value" id="predictedValue">--%</div>
+                        <div class="prediction-confidence">Confidence: <span id="confidenceLabel">--%</span></div>
+                        <div class="prediction-status" id="predictionStatus">Idle</div>
+                    </div>
+                    <div class="prediction-right">
+                        <div class="trend-canvas-wrap">
+                            <canvas id="predictionTrend" width="300" height="80"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="slots-grid">
                 <div class="slot-card" id="slot1">
                     <div class="slot-visual"></div>
@@ -127,6 +144,19 @@
         </main>
     </div>
 
-    <script src="dashboard.js"></script>
+        <script src="dashboard.js"></script>
+        <!-- TensorFlow.js for in-browser ML -->
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0"></script>
+        <script src="prediction.js"></script>
+        <script>
+            // Start PredictionEngine when TF.js and DOM are ready
+            document.addEventListener('DOMContentLoaded', () => {
+                if (typeof tf !== 'undefined' && window.PredictionEngine) {
+                    try { window.PredictionEngine.start(); } catch(e){ console.warn('PredictionEngine start failed', e); }
+                } else {
+                    console.warn('tf or PredictionEngine not available yet');
+                }
+            });
+        </script>
 </body>
 </html>
