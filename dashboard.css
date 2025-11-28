@@ -4,11 +4,22 @@
     box-sizing: border-box;
 }
 
+:root {
+    --neon-pink: #ff4ec8;
+    --neon-blue: #5f9bff;
+    --dark-bg: #0e1325;
+    --card-bg: rgba(30, 41, 59, 0.5);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --violet: #6d4aff;
+    --accent: #a855f7;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
-    background: #0f172a;
+    background: linear-gradient(135deg, #0e1325 0%, #1a1a3f 50%, #0e1325 100%);
     color: #f8fafc;
     overflow-x: hidden;
+    position: relative;
 }
 
 .dashboard-container {
@@ -19,13 +30,15 @@ body {
 /* Sidebar */
 .sidebar {
     width: 250px;
-    background: #1e293b;
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(10px);
     padding: 2rem 1rem;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     position: sticky;
     top: 0;
     height: 100vh;
     overflow-y: auto;
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.05);
 }
 
 .sidebar .logo {
@@ -35,7 +48,10 @@ body {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 3rem;
-    color: #ec4899;
+    background: linear-gradient(135deg, var(--neon-pink) 0%, var(--neon-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .sidebar .logo i {
@@ -65,13 +81,17 @@ body {
     color: #94a3b8;
     text-decoration: none;
     border-radius: 10px;
-    transition: all 0.3s;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 2px solid transparent;
+    position: relative;
 }
 
 .sidebar nav a:hover,
 .sidebar nav a.active {
-    background: #334155;
-    color: #ec4899;
+    background: rgba(255, 78, 200, 0.1);
+    color: var(--neon-pink);
+    border-left-color: var(--neon-pink);
+    transform: translateX(4px);
 }
 
 /* Main Content */
@@ -81,6 +101,7 @@ body {
     max-width: calc(100vw - 250px);
     overflow-x: hidden;
     overflow-y: auto;
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.1) 0%, rgba(15, 23, 42, 0.1) 100%);
 }
 
 header {
@@ -98,11 +119,14 @@ header h1 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(16, 185, 129, 0.2);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
+    background: rgba(16, 185, 129, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 0.75rem 1.25rem;
+    border-radius: 25px;
     color: #10b981;
     font-weight: 600;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
 }
 
 .pulse {
@@ -141,33 +165,58 @@ header h1 {
 /* NEW: Gas Alert Banner */
 .gas-alert-banner {
     display: none; /* shown via JS */
-    margin-bottom: 1rem;
-    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.15);
-    animation: none;
+    box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    animation: slideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .gas-alert-banner.show {
     display: block;
 }
+
 .gas-alert-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: 1rem 1.5rem;
     background: linear-gradient(90deg, rgba(239,68,68,0.95), rgba(220,38,38,0.95));
+    backdrop-filter: blur(10px);
     color: #fff;
     animation: pulseAlert 1.2s infinite ease-in-out;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
+
 .gas-alert-message {
     font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
 }
+
 .gas-alert-close {
     background: transparent;
     border: none;
     color: #fff;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0.5rem;
+}
+
+.gas-alert-close:hover {
+    transform: rotate(90deg);
 }
 
 @keyframes pulseAlert {
@@ -196,23 +245,66 @@ header h1 {
 }
 .gas-gauge-card {
     width: 300px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 1.25rem;
-    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(95, 155, 255, 0.15), rgba(109, 74, 255, 0.1));
+    backdrop-filter: blur(15px);
+    padding: 2.2rem;
+    border-radius: 20px;
     text-align: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 40px rgba(95, 155, 255, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    border: 1.5px solid rgba(95, 155, 255, 0.5);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.gas-gauge-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at top-right, rgba(95, 155, 255, 0.1), transparent);
+    pointer-events: none;
+}
+
+.gas-gauge-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(95, 155, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    border-color: rgba(95, 155, 255, 0.8);
+}
+
+.gas-gauge-card h3 {
+    margin-bottom: 1.5rem;
+    color: #f8fafc;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    position: relative;
+    z-index: 1;
 }
 .gauge-wrap {
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 0.5rem 0;
+    position: relative;
+    z-index: 1;
 }
-.gauge { width: 220px; height: 220px; }
+.gauge { 
+    width: 220px; 
+    height: 220px;
+    filter: drop-shadow(0 0 20px rgba(95, 155, 255, 0.4));
+    transition: filter 0.3s ease;
+}
+
+.slot-card:hover .gauge {
+    filter: drop-shadow(0 0 25px rgba(95, 155, 255, 0.5));
+}
+
 .gauge-status {
-    margin-top: 0.75rem;
+    margin-top: 1.5rem;
     font-weight: 700;
     color: #f8fafc;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* Smooth transitions and responsive adjustments */
@@ -235,26 +327,67 @@ header h1 {
 }
 
 .stat-box {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 1.5rem;
-    border-radius: 15px;
+    background: rgba(102, 126, 234, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 2rem 1.5rem;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    transition: transform 0.3s;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+    pointer-events: none;
+}
+
+.stat-box:hover::before {
+    left: 100%;
 }
 
 .stat-box:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 48px rgba(102, 126, 234, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .stat-box.available {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.stat-box.available:hover {
+    box-shadow: 0 12px 48px rgba(16, 185, 129, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
 }
 
 .stat-box.occupied {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.stat-box.occupied:hover {
+    box-shadow: 0 12px 48px rgba(239, 68, 68, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+.stat-box.gas-box {
+    background: rgba(95, 155, 255, 0.15);
+    border-color: rgba(95, 155, 255, 0.3);
+}
+
+.stat-box.gas-box:hover {
+    box-shadow: 0 12px 48px rgba(95, 155, 255, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
 }
 
 .stat-box i {
@@ -281,14 +414,21 @@ header h1 {
 }
 
 .chart-container {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    background: linear-gradient(135deg, rgba(30, 27, 75, 0.85), rgba(20, 15, 50, 0.85));
     padding: 2.5rem;
     border-radius: 25px;
     height: 420px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(148, 163, 184, 0.1);
+    box-shadow: 0 12px 40px rgba(109, 74, 255, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    border: 1.5px solid rgba(109, 74, 255, 0.4);
     margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
     animation: fadeInUp 0.6s ease-out;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chart-container:hover {
+    border-color: rgba(109, 74, 255, 0.6);
+    box-shadow: 0 16px 48px rgba(109, 74, 255, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15);
 }
 
 @keyframes fadeInUp {
@@ -311,6 +451,7 @@ header h1 {
     font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: -0.5px;
+    text-shadow: 0 0 20px rgba(255, 78, 198, 0.2);
 }
 
 .chart-box {
@@ -334,68 +475,96 @@ header h1 {
 .slots-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+    gap: 2rem;
     padding-bottom: 2rem;
 }
 
 .slot-card {
-    background: #1e293b;
+    background: rgba(30, 27, 75, 0.6);
+    backdrop-filter: blur(10px);
     padding: 2rem;
     border-radius: 20px;
     text-align: center;
-    transition: all 0.3s;
-    border: 2px solid transparent;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid rgba(109, 74, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(109, 74, 255, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.slot-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.08), transparent);
+    pointer-events: none;
 }
 
 .slot-card:hover {
-    transform: scale(1.05);
+    transform: translateY(-12px);
+    border-color: rgba(109, 74, 255, 0.6);
+    box-shadow: 0 16px 48px rgba(109, 74, 255, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
 }
 
 .slot-card.free {
-    border-color: #10b981;
-    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.2), inset 0 1px 1px rgba(16, 185, 129, 0.1);
+}
+
+.slot-card.free:hover {
+    border-color: rgba(16, 185, 129, 0.8);
+    box-shadow: 0 16px 48px rgba(16, 185, 129, 0.3), inset 0 1px 1px rgba(16, 185, 129, 0.2);
 }
 
 .slot-card.occupied {
-    border-color: #ef4444;
-    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 8px 32px rgba(239, 68, 68, 0.2), inset 0 1px 1px rgba(239, 68, 68, 0.1);
+}
+
+.slot-card.occupied:hover {
+    border-color: rgba(239, 68, 68, 0.8);
+    box-shadow: 0 16px 48px rgba(239, 68, 68, 0.3), inset 0 1px 1px rgba(239, 68, 68, 0.2);
 }
 
 .slot-visual {
     width: 100%;
     height: 120px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px dashed #64748b;
-    border-radius: 10px;
-    margin-bottom: 1rem;
+    background: rgba(30, 27, 75, 0.4);
+    border: 2px dashed rgba(109, 74, 255, 0.4);
+    border-radius: 15px;
+    margin-bottom: 1.5rem;
     position: relative;
     overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 15px rgba(109, 74, 255, 0.1);
 }
 
 .slot-visual::after {
     content: '🚗';
-    font-size: 3rem;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    font-size: 3.5rem;
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform: translate(0, 20px) scale(0.8);
 }
 
 .slot-card.occupied .slot-visual {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.6);
+    box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.15);
 }
 
 .slot-card.free .slot-visual {
     background: rgba(16, 185, 129, 0.1);
-    border-color: #10b981;
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.1);
 }
 
 .slot-card.occupied .slot-visual::after {
     opacity: 1;
+    transform: translate(0, 0);
 }
 
 .slot-card h3 {
