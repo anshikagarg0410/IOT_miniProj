@@ -23,16 +23,18 @@ const int echoPin = 11;
 // Gas sensor
 const int gasPin = A0;
 
-// -------------------------------------------
 // WiFi + ThingSpeak
-// -------------------------------------------
-char ssid[] = "Archiphone";      
+char ssid[] = "Archi";      
 char pass[] = "tannu@26";
 
 unsigned long channelID = 3175373;
 const char* apiKey = "EAS2XWQS7DA4CJPZ";
 
 WiFiClient client;
+
+// TIMER for ThingSpeak
+unsigned long lastUpload = 0;
+const long uploadInterval = 20000;  // 20 seconds
 
 // -------------------------------------------
 void setup() {
@@ -58,7 +60,7 @@ void setup() {
   Serial.println("Connecting to WiFi...");
   while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
     Serial.print(".");
-    delay(500);
+    delay(300);
   }
 
   Serial.println("\nWiFi Connected!");
@@ -98,13 +100,13 @@ void loop() {
   long dist = getDistance();
   int gasVal = analogRead(gasPin);
 
-  // GATE LOGIC (FAST)
+  // ---------------- FAST GATE LOGIC ----------------
   if (entry == LOW)
-    gate.write(90);     // open
+    gate.write(90);     // open instantly
   else
-    gate.write(0);      // close
+    gate.write(0);      // close instantly
 
-  // Serial Output
+  // Serial Output (always fast)
   Serial.println("\n----- LIVE DATA -----");
   Serial.print("Entry IR: "); Serial.println(entry == LOW ? "CAR" : "NO CAR");
   Serial.print("Slot1: "); Serial.println(slot1);
@@ -113,21 +115,26 @@ void loop() {
   Serial.print("Distance: "); Serial.println(dist);
   Serial.print("Gas Value: "); Serial.println(gasVal);
 
-  // -------------- ThingSpeak Upload --------------
-  ThingSpeak.setField(1, slot1);
-  ThingSpeak.setField(2, slot2);
-  ThingSpeak.setField(3, slot3);
-  ThingSpeak.setField(4, gasVal);
-  ThingSpeak.setField(5, dist);
+  // ---------------- THINGSPEAK UPLOAD (EVERY 20 SEC) ----------------
+  if (millis() - lastUpload >= uploadInterval) {
+    
+    ThingSpeak.setField(1, slot1);
+    ThingSpeak.setField(2, slot2);
+    ThingSpeak.setField(3, slot3);
+    ThingSpeak.setField(4, gasVal);
+    ThingSpeak.setField(5, dist);
 
-  int status = ThingSpeak.writeFields(channelID, apiKey);
+    int status = ThingSpeak.writeFields(channelID, apiKey);
 
-  if (status == 200)
-    Serial.println("✔ Data Uploaded Successfully!");
-  else {
-    Serial.print("❌ Upload Failed, Code: ");
-    Serial.println(status);
+    if (status == 200)
+      Serial.println("✔ Data Uploaded Successfully!");
+    else {
+      Serial.print("❌ Upload Failed, Code: ");
+      Serial.println(status);
+    }
+
+    lastUpload = millis();  // reset timer
   }
 
-  delay(20000);       // ThingSpeak minimum limit
+  delay(1000); // No delay here → fast response!
 }
