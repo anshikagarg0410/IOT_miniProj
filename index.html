@@ -61,25 +61,9 @@
             </a>
         </div>
         
-        <!-- 3D Parking Lot Animation -->
+        <!-- 3D Parking Lot Animation (canvas placed here for hero) -->
         <div class="parking-visual">
-            <div class="parking-slot" data-slot="1">
-                <div class="car"></div>
-            </div>
-            <div class="parking-slot" data-slot="2">
-                <div class="car occupied"></div>
-            </div>
-            <div class="parking-slot" data-slot="3">
-                <div class="car"></div>
-            </div>
-            <!-- NEW: Ultrasonic Tile inside slot section -->
-            <div class="ultrasonic-tile">
-                <i class="fas fa-ruler"></i>
-                <div class="ultra-text">
-                    <span class="label">Distance</span>
-                    <span class="value" id="ultraTileValue">No reading</span>
-                </div>
-            </div>
+            <canvas id="parking3d" aria-label="3D parking visualization"></canvas>
         </div>
     </section>
 
@@ -134,7 +118,7 @@
                     <i class="fas fa-robot"></i>
                 </div>
                 <div class="prediction-content">
-0 0           .        <h3 id="predictionText">Loading prediction...</h3>
+                <h3 id="predictionText">Loading prediction...</h3>
                     <p>Based on historical data, weather, and events</p>
                     <div class="confidence-bar">
                         <div class="confidence-fill" id="confidenceFill"></div>
@@ -142,9 +126,15 @@
                     <span class="confidence-label" id="confidenceLabel">Confidence: --</span>
                 </div>
             </div>
+            <!-- prediction visual intentionally left blank; hero contains the 3D canvas -->
         </div>
     </section>
 
+    <!-- Three.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Our parking 3D visualization -->
+    <script src="parking3d.js"></script>
+    <!-- Main application script -->
     <script src="script.js"></script>
 </body>
 </html>
