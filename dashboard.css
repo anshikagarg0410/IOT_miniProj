@@ -650,3 +650,344 @@ header h1 {
         grid-template-columns: 1fr;
     }
 }
+/* COMPLETE RIGHT SIDE COVERAGE - INCLUDING NAVBAR AREA */
+
+/* Hero Section - Full Screen Split */
+.hero {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    z-index: 1;
+}
+
+/* Left Content Area */
+.hero-content {
+    z-index: 10;
+    padding: 100px 5% 2rem 5%; /* Top padding to clear navbar */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 100%;
+    overflow-y: auto;
+}
+
+/* Right 3D Visual - FULL HEIGHT INCLUDING NAVBAR */
+/* RIGHT 3D VISUAL - FULL HEIGHT COVERAGE */
+/* RIGHT 3D VISUAL - FULL HEIGHT COVERAGE */
+.parking-visual {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    background: linear-gradient(135deg, #0e0e10 0%, #1a1a20 100%);
+    border-left: 1px solid rgba(255, 215, 0, 0.1);
+    z-index: 2;
+}
+
+#parking3d {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: grab;
+}
+
+#parking3d:active {
+    cursor: grabbing;
+}
+
+/* Navbar - Ensure it's above the 3D model */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    background: rgba(14, 14, 16, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 5%;
+    max-width: 100%;
+}
+
+/* Overlay instructions */
+.parking-visual::after {
+    content: 'Drag to Rotate • Scroll to Zoom';
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 20px;
+    border-radius: 20px;
+    color: #FFD700;
+    font-size: 0.85rem;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    pointer-events: none;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+    z-index: 10;
+}
+
+.parking-visual:hover::after {
+    opacity: 1;
+}
+
+/* Stats Grid */
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+    margin: 2.5rem 0;
+}
+
+.stat-card {
+    background: rgba(20, 20, 25, 0.8);
+    padding: 1.5rem;
+    border-radius: 15px;
+    text-align: center;
+    border: 1px solid rgba(255, 215, 0, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 215, 0, 0.4);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+}
+
+.stat-card i {
+    font-size: 2rem;
+    color: #FFD700;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.stat-card h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0.5rem 0;
+}
+
+.stat-card p {
+    font-size: 0.85rem;
+    color: #aaa;
+    margin: 0;
+}
+
+/* Ultrasonic Card */
+.stat-card.ultrasonic {
+    background: linear-gradient(135deg, rgba(65, 88, 208, 0.2), rgba(200, 80, 192, 0.2));
+    border-color: rgba(65, 88, 208, 0.3);
+}
+
+.stat-card.ultrasonic:hover {
+    border-color: rgba(65, 88, 208, 0.6);
+    box-shadow: 0 10px 30px rgba(65, 88, 208, 0.3);
+}
+
+/* CTA Button */
+.cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #000;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+    align-self: flex-start;
+}
+
+.cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(255, 215, 0, 0.5);
+}
+
+.cta-button i {
+    transition: transform 0.3s ease;
+}
+
+.cta-button:hover i {
+    transform: translateX(5px);
+}
+
+/* Title Styles */
+.glitch {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 800;
+    text-transform: uppercase;
+    position: relative;
+    color: #fff;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    color: #FFD700;
+    margin-bottom: 2rem;
+    font-weight: 300;
+}
+
+/* Glow Effect */
+.parking-visual::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 215, 0, 0.05),
+        rgba(65, 88, 208, 0.05),
+        rgba(200, 80, 192, 0.05)
+    );
+    z-index: 1;
+    pointer-events: none;
+    animation: glow 3s ease-in-out infinite;
+}
+
+@keyframes glow {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Ensure features section starts below hero */
+.features {
+    position: relative;
+    z-index: 5;
+    margin-top: 100vh;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 1200px) {
+    .hero-content {
+        padding: 100px 3% 2rem 3%;
+    }
+}
+
+@media (max-width: 968px) {
+    .hero {
+        position: relative;
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    .hero-content {
+        position: relative;
+        padding: 100px 5% 2rem 5%;
+        text-align: center;
+        z-index: 10;
+    }
+    
+    .parking-visual {
+        position: relative;
+        width: 100%;
+        height: 60vh;
+        min-height: 500px;
+        order: -1;
+        border-left: none;
+        border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        top: auto;
+        right: auto;
+    }
+    
+    .hero-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .cta-button {
+        align-self: center;
+    }
+    
+    .features {
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .parking-visual {
+        height: 50vh;
+        min-height: 400px;
+    }
+    
+    .hero-stats {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1.2rem;
+    }
+    
+    .parking-visual::after {
+        font-size: 0.75rem;
+        padding: 6px 15px;
+        bottom: 10px;
+    }
+    
+    .hero-content {
+        padding: 80px 5% 2rem 5%;
+    }
+}
+
+/* Loading State */
+#parking3d.loading {
+    background: linear-gradient(135deg, rgba(20, 20, 25, 0.9), rgba(40, 40, 45, 0.9));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#parking3d.loading::before {
+    content: 'Loading 3D Model...';
+    color: #FFD700;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Particles Background - Make sure it doesn't overlap */
+.particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 50vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+}
+
+@media (max-width: 968px) {
+    .particles {
+        width: 100vw;
+    }
+}
