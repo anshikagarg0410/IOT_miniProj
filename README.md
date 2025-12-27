@@ -6,6 +6,7 @@ The aim of the project is to **monitor parking slot occupancy in real-time**, **
 All sensor readings are updated live on a **modern web dashboard** featuring a **clean black and yellow theme**, making the system suitable for **smart campus**, **mall**, or **society parking automation**.
 
 ---
+live demo - https://igdtuw-iot-project.netlify.app/
 
 ## 🎨 **UI Design Features**
 
