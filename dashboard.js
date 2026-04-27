@@ -1,16 +1,25 @@
 // ============================================================================
-// THINGSPEAK CONFIGURATION
+// THINGSPEAK CONFIGURATION (Adv_IOT Channel)
 // ============================================================================
-const CHANNEL_ID = '3175373';
-const READ_API_KEY = 'ZI1JL5YU6DRGVBOS';
+const CHANNEL_ID = '3358675';
+const READ_API_KEY = 'XNLL6JBRE7I5NVFA';
 const THINGSPEAK_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${READ_API_KEY}&results=20`;
+
+// ============================================================================
+// FIELD MAPPING (matching Arduino code)
+// field1 = Gas Value (analog 0-1023)
+// field2 = Distance cm (ultrasonic)
+// field3 = IR1 slot (1=empty, 0=occupied)
+// field4 = IR2 slot (1=empty, 0=occupied)
+// field5 = IR3 slot (1=empty, 0=occupied)
+// ============================================================================
 
 // ============================================================================
 // STORAGE CONFIGURATION
 // ============================================================================
 const OCCUPANCY_HISTORY_KEY = 'smartpark_occupancy_history';
-const MAX_HISTORY_POINTS = 800; // ~24 hours with 2-min intervals
-const HISTORY_RETENTION_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const MAX_HISTORY_POINTS = 800;
+const HISTORY_RETENTION_MS = 24 * 60 * 60 * 1000;
 
 // ============================================================================
 // CHART INSTANCES
@@ -53,21 +62,17 @@ function addOccupancyRecord(occupancyPercent) {
     let history = getOccupancyHistory();
     const now = new Date();
     
-    // Create new record
     const record = {
         timestamp: now.toISOString(),
         occupancy: occupancyPercent,
         time: now.getTime()
     };
     
-    // Add record
     history.push(record);
     
-    // Prune old records (older than 24 hours)
     const cutoffTime = now.getTime() - HISTORY_RETENTION_MS;
     history = history.filter(r => r.time >= cutoffTime);
     
-    // Limit to max points
     if (history.length > MAX_HISTORY_POINTS) {
         history = history.slice(-MAX_HISTORY_POINTS);
     }
@@ -98,7 +103,6 @@ function formatTimeLabel(timestamp) {
 function initChart() {
     const ctx = document.getElementById('occupancyChart').getContext('2d');
     
-    // Create gradient for fill
     const gradientFill = ctx.createLinearGradient(0, 0, 0, 400);
     gradientFill.addColorStop(0, 'rgba(255, 208, 0, 0.3)');
     gradientFill.addColorStop(1, 'rgba(255, 208, 0, 0)');
@@ -110,10 +114,10 @@ function initChart() {
             datasets: [{
                 label: 'Occupancy Rate (%)',
                 data: [],
-                borderColor: '#FFD000', // Yellow accent
+                borderColor: '#FFD000',
                 backgroundColor: gradientFill,
                 borderWidth: 3,
-                tension: 0.4, // Smooth curve
+                tension: 0.4,
                 fill: true,
                 pointRadius: 5,
                 pointHoverRadius: 7,
@@ -122,7 +126,6 @@ function initChart() {
                 pointBorderWidth: 2,
                 segment: {
                     borderColor: ctx => {
-                        // Gradient effect on line
                         return '#ff4ec6';
                     }
                 }
@@ -212,14 +215,13 @@ function initChart() {
 }
 
 /**
- * Update occupancy chart with history data (smart downsampling for long history)
+ * Update occupancy chart with history data
  */
 function updateOccupancyChart() {
     let history = getOccupancyHistory();
     
     if (history.length === 0) return;
     
-    // Downsample if too many points (for performance)
     let displayData = history;
     if (history.length > 100) {
         const step = Math.ceil(history.length / 100);
@@ -229,7 +231,6 @@ function updateOccupancyChart() {
     const labels = displayData.map(r => formatTimeLabel(r.timestamp));
     const occupancyData = displayData.map(r => r.occupancy);
     
-    // Update chart with fade animation
     occupancyChart.data.labels = labels;
     occupancyChart.data.datasets[0].data = occupancyData;
     occupancyChart.update('none');
@@ -242,7 +243,6 @@ function updateOccupancyChart() {
 function initGasChart() {
     const ctx = document.getElementById('gasChart').getContext('2d');
     
-    // Create gradient for line
     const gradient = ctx.createLinearGradient(0, 0, 600, 0);
     gradient.addColorStop(0, '#10b981');
     gradient.addColorStop(0.5, '#f59e0b');
@@ -279,7 +279,7 @@ function initGasChart() {
                 y: {
                     beginAtZero: true,
                     min: 0,
-                    max: 500,
+                    max: 1024,
                     ticks: { color: '#FFFFFF' },
                     grid: { color: 'rgba(255,255,255,0.08)' }
                 },
@@ -320,14 +320,14 @@ function updateGasLevel(ppm) {
         gaugeStatus.textContent = 'Danger';
     }
 
-    const max = 500;
+    const max = 1024;
     const pct = Math.min(ppm / max, 1);
     const radius = 44;
     const circumference = 2 * Math.PI * radius;
     const dash = circumference * pct;
     gaugeProgress.setAttribute('stroke-dasharray', `${dash} ${circumference}`);
 
-    if (ppm > 300) {
+    if (ppm > 500) {
         showGasAlert();
     } else {
         hideGasAlert();
@@ -357,11 +357,98 @@ function hideGasAlert() {
 }
 
 // ============================================================================
+// DISTANCE / BUZZER / GATE STATUS UPDATES (derived from existing fields)
+// ============================================================================
+
+/**
+ * Update ultrasonic distance display (from field2)
+ */
+function updateDistanceDisplay(distanceCm) {
+    const distEl = document.getElementById('distanceValue');
+    const distBox = document.getElementById('distanceStatBox');
+    if (!distEl || !distBox) return;
+
+    if (distanceCm !== null && !isNaN(distanceCm)) {
+        distEl.textContent = `${distanceCm} cm`;
+        if (distanceCm <= 10) {
+            distBox.style.borderColor = 'rgba(239, 68, 68, 0.8)';
+            distBox.style.boxShadow = '0 4px 20px rgba(239, 68, 68, 0.3)';
+        } else if (distanceCm <= 30) {
+            distBox.style.borderColor = 'rgba(245, 158, 11, 0.8)';
+            distBox.style.boxShadow = '0 4px 20px rgba(245, 158, 11, 0.3)';
+        } else {
+            distBox.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+            distBox.style.boxShadow = '0 4px 20px rgba(16, 185, 129, 0.2)';
+        }
+    } else {
+        distEl.textContent = 'N/A';
+    }
+}
+
+/**
+ * Update buzzer status indicator (derived: gas > 500 threshold)
+ */
+function updateBuzzerStatus(gasValue) {
+    const buzzerEl = document.getElementById('buzzerValue');
+    const buzzerBox = document.getElementById('buzzerStatBox');
+    const buzzerIcon = document.getElementById('buzzerIcon');
+    if (!buzzerEl || !buzzerBox) return;
+
+    if (gasValue > 500) {
+        buzzerEl.textContent = 'ALERT ON';
+        buzzerBox.classList.add('buzzer-active');
+        buzzerBox.style.borderColor = 'rgba(239, 68, 68, 0.8)';
+        buzzerBox.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.15))';
+        if (buzzerIcon) buzzerIcon.className = 'fas fa-volume-up';
+    } else {
+        buzzerEl.textContent = 'SILENT';
+        buzzerBox.classList.remove('buzzer-active');
+        buzzerBox.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+        buzzerBox.style.background = '';
+        if (buzzerIcon) buzzerIcon.className = 'fas fa-volume-mute';
+    }
+}
+
+/**
+ * Update gate/servo status display (derived: IR1 slot empty → gate open)
+ */
+function updateGateStatus(ir1Value) {
+    const gateEl = document.getElementById('gateValue');
+    const gateBox = document.getElementById('gateStatBox');
+    const gateIcon = document.getElementById('gateIcon');
+    if (!gateEl || !gateBox) return;
+
+    // In Arduino: irState1 == LOW → sends 1 → "EMPTY" → servo opens gate to 90°
+    if (ir1Value === 1) {
+        gateEl.textContent = 'OPEN (90°)';
+        gateBox.classList.add('gate-open');
+        gateBox.classList.remove('gate-closed');
+        gateBox.style.borderColor = 'rgba(16, 185, 129, 0.8)';
+        gateBox.style.boxShadow = '0 4px 20px rgba(16, 185, 129, 0.3)';
+        if (gateIcon) gateIcon.className = 'fas fa-door-open';
+    } else {
+        gateEl.textContent = 'CLOSED (0°)';
+        gateBox.classList.remove('gate-open');
+        gateBox.classList.add('gate-closed');
+        gateBox.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+        gateBox.style.boxShadow = '0 4px 20px rgba(239, 68, 68, 0.2)';
+        if (gateIcon) gateIcon.className = 'fas fa-door-closed';
+    }
+}
+
+// ============================================================================
 // DASHBOARD DATA UPDATES
 // ============================================================================
 
 /**
  * Fetch and update all dashboard data from ThingSpeak
+ * 
+ * Arduino field mapping:
+ *   field1 = gasValue
+ *   field2 = distance (cm)
+ *   field3 = IR1 slot (1=occupied, 0=vacant)
+ *   field4 = IR2 slot (1=occupied, 0=vacant)
+ *   field5 = IR3 slot (1=occupied, 0=vacant)
  */
 async function updateDashboard() {
     try {
@@ -371,17 +458,29 @@ async function updateDashboard() {
         if (data.feeds && data.feeds.length > 0) {
             const latestData = data.feeds[data.feeds.length - 1];
             
-            // Parse slot data
-            const slot1 = parseInt(latestData.field1) || 0;
-            const slot2 = parseInt(latestData.field2) || 0;
-            const slot3 = parseInt(latestData.field3) || 0;
-            
-            // Parse gas data
-            const gasRaw = latestData.field4;
+            // ---- Parse fields matching Arduino code ----
+            // field1 = Gas Value
+            const gasRaw = latestData.field1;
             const gasPPM = (gasRaw === null || gasRaw === undefined || gasRaw === '') ? null : parseFloat(gasRaw);
-            
+
+            // field2 = Distance (cm)
+            const distRaw = latestData.field2;
+            const distanceCm = (distRaw === null || distRaw === undefined || distRaw === '') ? null : parseFloat(distRaw);
+
+            // field3-5 = IR slot states
+            // Arduino: IR detects car → LOW → sends 1 = OCCUPIED
+            // Arduino: No car → HIGH → sends 0 = VACANT
+            const ir1Val = parseInt(latestData.field3) || 0;
+            const ir2Val = parseInt(latestData.field4) || 0;
+            const ir3Val = parseInt(latestData.field5) || 0;
+
+            // Direct mapping: 1 = occupied, 0 = vacant
+            const slot1Occupied = ir1Val;
+            const slot2Occupied = ir2Val;
+            const slot3Occupied = ir3Val;
+
             const totalSlots = 3;
-            const occupiedSlots = slot1 + slot2 + slot3;
+            const occupiedSlots = slot1Occupied + slot2Occupied + slot3Occupied;
             const availableSlots = totalSlots - occupiedSlots;
             const occupancyRate = Math.round((occupiedSlots / totalSlots) * 100);
             
@@ -391,19 +490,18 @@ async function updateDashboard() {
             animateValue('occupiedSlots', 0, occupiedSlots, 500);
             document.getElementById('occupancyRate').textContent = occupancyRate + '%';
             
-            // Update slot cards
-            updateSlotCard('slot1', slot1);
-            updateSlotCard('slot2', slot2);
-            updateSlotCard('slot3', slot3);
+            // Update slot cards (pass occupied flag: 1=occupied, 0=free)
+            updateSlotCard('slot1', slot1Occupied);
+            updateSlotCard('slot2', slot2Occupied);
+            updateSlotCard('slot3', slot3Occupied);
             
             // Add occupancy record to history and update chart
             addOccupancyRecord(occupancyRate);
             updateOccupancyChart();
             
-            // Update gas sensor
+            // Update gas sensor (field1)
             if (gasPPM !== null && !isNaN(gasPPM)) {
                 updateGasLevel(gasPPM);
-                // Add to gas chart - add first data point or if value changed
                 if (gasChart) {
                     const lastVal = gasChart.data.datasets[0].data.length > 0 
                         ? gasChart.data.datasets[0].data[gasChart.data.datasets[0].data.length - 1] 
@@ -420,6 +518,17 @@ async function updateDashboard() {
                     }
                 }
             }
+
+            // Update distance display (field2)
+            updateDistanceDisplay(distanceCm);
+
+            // Update buzzer status (derived from gas > 500 threshold)
+            if (gasPPM !== null && !isNaN(gasPPM)) {
+                updateBuzzerStatus(gasPPM);
+            }
+
+            // Update gate/servo status (derived from IR1 = field3)
+            updateGateStatus(ir1Val);
         }
     } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -451,13 +560,13 @@ function animateValue(id, start, end, duration) {
 /**
  * Update slot card status
  */
-function updateSlotCard(slotId, status) {
+function updateSlotCard(slotId, isOccupied) {
     const slotCard = document.getElementById(slotId);
     const statusElement = slotCard.querySelector('.status');
     
     slotCard.classList.remove('free', 'occupied');
     
-    if (status === 0) {
+    if (isOccupied === 0) {
         slotCard.classList.add('free');
         statusElement.textContent = '✓ Available';
     } else {
@@ -486,8 +595,8 @@ window.addEventListener('DOMContentLoaded', () => {
     // Fetch latest data from ThingSpeak
     updateDashboard();
     
-    // Set up auto-refresh (every 20 seconds to match Arduino upload rate)
-    setInterval(updateDashboard, 20000);
+    // Set up auto-refresh (every 16 seconds to match Arduino 15s delay)
+    setInterval(updateDashboard, 16000);
     
     // Setup gas alert close button
     const closeBtn = document.getElementById('gasAlertClose');
@@ -495,5 +604,5 @@ window.addEventListener('DOMContentLoaded', () => {
         closeBtn.addEventListener('click', hideGasAlert);
     }
     
-    console.log('Dashboard loaded with occupancy history support');
+    console.log('Dashboard loaded — Adv_IOT Channel');
 });

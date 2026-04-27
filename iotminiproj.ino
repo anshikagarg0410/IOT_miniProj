@@ -1,140 +1,143 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <Servo.h>
 #include <WiFiS3.h>
 #include <ThingSpeak.h>
-#include <Servo.h>
 
-// -------------------------------------------
-// SERVO & SENSORS
-// -------------------------------------------
-Servo gate;
-
-// IR sensor pins
-const int entryIR = 5;       
-const int slot1IR = 6;
-const int slot2IR = 7;
-const int slot3IR = 8;
-
-// Servo
-const int servoPin = 9;
-
-// Ultrasonic
-const int trigPin = 10;
-const int echoPin = 11;
-
-// Gas sensor
-const int gasPin = A0;
-
-// WiFi + ThingSpeak
-char ssid[] = "Archi";      
+// ---------------- WIFI ----------------
+char ssid[] = "Archi";
 char pass[] = "tannu@26";
 
-unsigned long channelID = 3175373;
-const char* apiKey = "EAS2XWQS7DA4CJPZ";
+// ---------------- THINGSPEAK ----------------
+unsigned long channelID = 3358675;
+const char* writeAPIKey = "983BSKISRRKMBQPG";
 
-WiFiClient client;
+WiFiClient clientTS;
 
-// TIMER for ThingSpeak
-unsigned long lastUpload = 0;
-const long uploadInterval = 20000;  // 20 seconds
+// OLED setup
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-// -------------------------------------------
+// IR sensors
+int ir1 = 2;
+int ir2 = 3;
+int ir3 = 4;
+
+// Buzzer
+int buzzer = 6;
+
+// Servo
+Servo myServo;
+int servoPin = 7;
+
+// Ultrasonic
+int trigPin = 12;
+int echoPin = 13;
+
+// Gas sensor
+int gasPin = A0;
+int gasThreshold = 500;
+
+// ---------------- WIFI CONNECT ----------------
+void setup_wifi() {
+  WiFi.begin(ssid, pass);
+
+  Serial.print("Connecting WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\nWiFi Connected 🚀");
+}
+
 void setup() {
   Serial.begin(9600);
 
-  // Entry IR uses PULLUP
-  pinMode(entryIR, INPUT_PULLUP);
+  pinMode(ir1, INPUT_PULLUP);
+  pinMode(ir2, INPUT_PULLUP);
+  pinMode(ir3, INPUT_PULLUP);
 
-  // Slot IRs use plain INPUT
-  pinMode(slot1IR, INPUT);
-  pinMode(slot2IR, INPUT);
-  pinMode(slot3IR, INPUT);
+  pinMode(buzzer, OUTPUT);
 
-  // Ultrasonic
+  myServo.attach(servoPin);
+  myServo.write(0);
+
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 
-  // Servo
-  gate.attach(servoPin);
-  gate.write(0);
+  setup_wifi();
 
-  // WiFi
-  Serial.println("Connecting to WiFi...");
-  while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
-    Serial.print(".");
-    delay(300);
+  ThingSpeak.begin(clientTS);
+
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println("OLED failed");
+    while (true);
   }
-
-  Serial.println("\nWiFi Connected!");
-  ThingSpeak.begin(client);
 }
 
-// -------------------------------------------
-// ULTRASONIC DISTANCE
-// -------------------------------------------
-long getDistance() {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-
-  digitalWrite(trigPin, LOW);
-
-  long duration = pulseIn(echoPin, HIGH, 30000);
-  if (duration == 0) 
-    return -1;
-
-  return duration / 58;
-}
-
-// -------------------------------------------
-// LOOP
-// -------------------------------------------
 void loop() {
 
-  // Read IR sensors
-  int entry = digitalRead(entryIR);
-  int slot1 = digitalRead(slot1IR) == LOW ? 1 : 0;
-  int slot2 = digitalRead(slot2IR) == LOW ? 1 : 0;
-  int slot3 = digitalRead(slot3IR) == LOW ? 1 : 0;
+  int irState1 = digitalRead(ir1);
+  int irState2 = digitalRead(ir2);
+  int irState3 = digitalRead(ir3);
 
-  long dist = getDistance();
-  int gasVal = analogRead(gasPin);
+  int gasValue = analogRead(gasPin);
 
-  // ---------------- FAST GATE LOGIC ----------------
-  if (entry == LOW)
-    gate.write(90);     // open instantly
-  else
-    gate.write(0);      // close instantly
+  long duration;
+  int distance;
 
-  // Serial Output (always fast)
-  Serial.println("\n----- LIVE DATA -----");
-  Serial.print("Entry IR: "); Serial.println(entry == LOW ? "CAR" : "NO CAR");
-  Serial.print("Slot1: "); Serial.println(slot1);
-  Serial.print("Slot2: "); Serial.println(slot2);
-  Serial.print("Slot3: "); Serial.println(slot3);
-  Serial.print("Distance: "); Serial.println(dist);
-  Serial.print("Gas Value: "); Serial.println(gasVal);
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
 
-  // ---------------- THINGSPEAK UPLOAD (EVERY 20 SEC) ----------------
-  if (millis() - lastUpload >= uploadInterval) {
-    
-    ThingSpeak.setField(1, slot1);
-    ThingSpeak.setField(2, slot2);
-    ThingSpeak.setField(3, slot3);
-    ThingSpeak.setField(4, gasVal);
-    ThingSpeak.setField(5, dist);
+  duration = pulseIn(echoPin, HIGH);
+  distance = duration * 0.034 / 2;
 
-    int status = ThingSpeak.writeFields(channelID, apiKey);
+  // 🔊 Buzzer
+  digitalWrite(buzzer, (gasValue > gasThreshold));
 
-    if (status == 200)
-      Serial.println("✔ Data Uploaded Successfully!");
-    else {
-      Serial.print("❌ Upload Failed, Code: ");
-      Serial.println(status);
-    }
+  // ⚙️ Servo
+  if (irState1 == LOW) myServo.write(90);
+  else myServo.write(0);
 
-    lastUpload = millis();  // reset timer
+  // 🧠 Convert IR
+  String s1 = (irState1 == LOW) ? "EMPTY" : "OCCUPIED";
+  String s2 = (irState2 == LOW) ? "EMPTY" : "OCCUPIED";
+  String s3 = (irState3 == LOW) ? "EMPTY" : "OCCUPIED";
+
+  // 📡 THINGSPEAK SEND
+  ThingSpeak.setField(1, gasValue);
+  ThingSpeak.setField(2, distance);
+  ThingSpeak.setField(3, irState1 == LOW ? 1 : 0);
+  ThingSpeak.setField(4, irState2 == LOW ? 1 : 0);
+  ThingSpeak.setField(5, irState3 == LOW ? 1 : 0);
+
+  int x = ThingSpeak.writeFields(channelID, writeAPIKey);
+
+  if (x == 200) {
+    Serial.println("ThingSpeak Update OK ✅");
+  } else {
+    Serial.println("Update Failed ❌");
   }
 
-  delay(1000); // No delay here → fast response!
+  // 📺 OLED
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0,0);
+  display.print("THINGSPEAK LIVE");
+
+  display.setCursor(0,12);
+  display.print("Gas: "); display.println(gasValue);
+
+  display.setCursor(0,24);
+  display.print("Dist: "); display.println(distance);
+
+  display.display();
+
+  delay(15000); // IMPORTANT (ThingSpeak limit)
 }

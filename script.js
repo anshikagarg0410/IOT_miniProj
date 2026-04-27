@@ -1,6 +1,6 @@
-// ThingSpeak Configuration
-const CHANNEL_ID = '3175373';
-const READ_API_KEY = 'EAS2XWQS7DA4CJPZ';
+// ThingSpeak Configuration (Adv_IOT Channel)
+const CHANNEL_ID = '3358675';
+const READ_API_KEY = 'XNLL6JBRE7I5NVFA';
 const THINGSPEAK_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${READ_API_KEY}&results=10`;
 
 // Create animated particles
@@ -50,6 +50,11 @@ function createParticles() {
 }
 
 // Fetch data from ThingSpeak
+// Arduino field mapping:
+//   field1 = gasValue, field2 = distance(cm)
+//   field3 = IR1 (1=empty, 0=occupied)
+//   field4 = IR2 (1=empty, 0=occupied)
+//   field5 = IR3 (1=empty, 0=occupied)
 async function fetchParkingData() {
     try {
         const response = await fetch(THINGSPEAK_URL);
@@ -58,22 +63,31 @@ async function fetchParkingData() {
         if (data.feeds && data.feeds.length > 0) {
             const latestData = data.feeds[data.feeds.length - 1];
             
-            // Assuming field1 = slot1, field2 = slot2, field3 = slot3
-            // 1 = occupied, 0 = free
-            const slot1 = parseInt(latestData.field1) || 0;
-            const slot2 = parseInt(latestData.field2) || 0;
-            const slot3 = parseInt(latestData.field3) || 0;
-            // Field5 -> Ultrasonic Distance (cm)
-            const ultrasonicRaw = latestData.field5;
-            const ultrasonic = (ultrasonicRaw === null || ultrasonicRaw === undefined || ultrasonicRaw === '') ? null : parseFloat(ultrasonicRaw);
+            // field1 = gas, field2 = distance
+            const gasRaw = latestData.field1;
+            const gasValue = (gasRaw === null || gasRaw === undefined || gasRaw === '') ? null : parseFloat(gasRaw);
+
+            const distRaw = latestData.field2;
+            const ultrasonic = (distRaw === null || distRaw === undefined || distRaw === '') ? null : parseFloat(distRaw);
+
+            // field3-5 = IR slots (1=occupied, 0=vacant)
+            const ir1Val = parseInt(latestData.field3) || 0;
+            const ir2Val = parseInt(latestData.field4) || 0;
+            const ir3Val = parseInt(latestData.field5) || 0;
+
+            // Direct: 1 = occupied, 0 = vacant
+            const slot1Occ = ir1Val;
+            const slot2Occ = ir2Val;
+            const slot3Occ = ir3Val;
             
             const totalSlots = 3;
-            const occupiedSlots = slot1 + slot2 + slot3;
+            const occupiedSlots = slot1Occ + slot2Occ + slot3Occ;
             const availableSlots = totalSlots - occupiedSlots;
             
             // Update UI
             document.getElementById('availableSlots').textContent = availableSlots;
-            // Update ultrasonic card (show cm or No reading)
+
+            // Update ultrasonic card
             const ultraEl = document.getElementById('ultraDistance');
             const ultraTileEl = document.getElementById('ultraTileValue');
             if (ultrasonic !== null && !isNaN(ultrasonic)) {
@@ -85,8 +99,8 @@ async function fetchParkingData() {
                 if (ultraTileEl) ultraTileEl.textContent = 'No reading';
             }
             
-            // Update parking visual
-            updateParkingVisual([slot1, slot2, slot3]);
+            // Update parking visual (pass occupied flags)
+            updateParkingVisual([slot1Occ, slot2Occ, slot3Occ]);
             
             return data.feeds;
         }
@@ -110,6 +124,7 @@ function updateParkingVisual(slots) {
 }
 
 // Predictive Algorithm (Simple Linear Regression)
+// Updated for new field mapping: field3-5 = IR slots (1=empty, 0=occupied)
 async function predictAvailability() {
     try {
         const response = await fetch(THINGSPEAK_URL);
@@ -119,9 +134,12 @@ async function predictAvailability() {
             // Calculate average occupancy from historical data
             let totalOccupancy = 0;
             data.feeds.forEach(feed => {
-                const occupied = (parseInt(feed.field1) || 0) + 
-                               (parseInt(feed.field2) || 0) + 
-                               (parseInt(feed.field3) || 0);
+                // field3-5 are IR slots: 1=occupied, 0=vacant
+                const ir1 = parseInt(feed.field3) || 0;
+                const ir2 = parseInt(feed.field4) || 0;
+                const ir3 = parseInt(feed.field5) || 0;
+                // Direct: 1=occupied
+                const occupied = ir1 + ir2 + ir3;
                 totalOccupancy += occupied;
             });
             

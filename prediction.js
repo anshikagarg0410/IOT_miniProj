@@ -14,8 +14,8 @@ Implementation notes:
 */
 
 // Config (can be changed to reuse constants from other scripts)
-const PRED_CHANNEL_ID = typeof CHANNEL_ID !== 'undefined' ? CHANNEL_ID : '3175373';
-const PRED_READ_API_KEY = typeof READ_API_KEY !== 'undefined' ? READ_API_KEY : 'EAS2XWQS7DA4CJPZ';
+const PRED_CHANNEL_ID = typeof CHANNEL_ID !== 'undefined' ? CHANNEL_ID : '3358675';
+const PRED_READ_API_KEY = typeof READ_API_KEY !== 'undefined' ? READ_API_KEY : 'XNLL6JBRE7I5NVFA';
 const PRED_THINGSPEAK_URL = `https://api.thingspeak.com/channels/${PRED_CHANNEL_ID}/feeds.json?api_key=${PRED_READ_API_KEY}&results=100`;
 
 // Runtime intervals (ms)
@@ -68,7 +68,12 @@ async function fetchThingSpeakData() {
 
 /* -------------------- Helper: prepareFeatures --------------------
    From feeds -> numeric arrays of features and labels
-   Features per row: [slot1, slot2, slot3, gasPPM, ultrasonicCm, hour, minute, timeIndex]
+   Arduino field mapping:
+     field1 = gasValue, field2 = distance(cm)
+     field3 = IR1 (1=empty, 0=occupied)
+     field4 = IR2 (1=empty, 0=occupied)
+     field5 = IR3 (1=empty, 0=occupied)
+   Features per row: [ir1, ir2, ir3, gasPPM, ultrasonicCm, hour, minute, timeIndex]
    Label: occupancy fraction (occupiedSlots / totalSlots) normalized 0..1
 */
 function prepareFeatures(feeds) {
@@ -77,21 +82,27 @@ function prepareFeatures(feeds) {
   let timeIndex = 0;
   for (let i = 0; i < feeds.length; i++) {
     const f = feeds[i];
-    const s1 = parseInt(f.field1) || 0;
-    const s2 = parseInt(f.field2) || 0;
-    const s3 = parseInt(f.field3) || 0;
-    const gas = f.field4 === null || f.field4 === undefined || f.field4 === '' ? 0 : parseFloat(f.field4);
-    const ultrasonic = f.field5 === null || f.field5 === undefined || f.field5 === '' ? 0 : parseFloat(f.field5);
+    // field1 = gas, field2 = distance
+    const gas = f.field1 === null || f.field1 === undefined || f.field1 === '' ? 0 : parseFloat(f.field1);
+    const ultrasonic = f.field2 === null || f.field2 === undefined || f.field2 === '' ? 0 : parseFloat(f.field2);
+    // field3-5 = IR slots (1=occupied, 0=vacant)
+    const ir1 = parseInt(f.field3) || 0;
+    const ir2 = parseInt(f.field4) || 0;
+    const ir3 = parseInt(f.field5) || 0;
+    // Direct: 1=occupied, 0=vacant
+    const s1occ = ir1;
+    const s2occ = ir2;
+    const s3occ = ir3;
     const ts = new Date(f.created_at);
     const hour = ts.getHours();
     const minute = ts.getMinutes();
-    const occupied = s1 + s2 + s3;
+    const occupied = s1occ + s2occ + s3occ;
     const occupancy = occupied / 3; // 0..1
 
     rows.push({
-      x: [s1, s2, s3, gas, ultrasonic, hour, minute, timeIndex],
+      x: [s1occ, s2occ, s3occ, gas, ultrasonic, hour, minute, timeIndex],
       y: occupancy,
-      raw: {s1, s2, s3, gas, ultrasonic, hour, minute, timeIndex, created_at: f.created_at}
+      raw: {s1: s1occ, s2: s2occ, s3: s3occ, gas, ultrasonic, hour, minute, timeIndex, created_at: f.created_at}
     });
     timeIndex += 1;
   }

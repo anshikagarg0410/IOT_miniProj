@@ -24,7 +24,7 @@
         </aside>
 
         <main class="main-content">
-            <!-- NEW: Gas Alert Banner (hidden by default) -->
+            <!-- Gas Alert Banner (hidden by default) -->
             <div class="gas-alert-banner" id="gasAlert" style="display:none;">
                 <div class="gas-alert-content">
                     <span class="gas-alert-message">⚠️ HIGH GAS DETECTED! Ventilation activated.</span>
@@ -38,6 +38,7 @@
                 </div>
             </header>
 
+            <!-- Row 1: Core Stats -->
             <div class="stats-grid">
                 <div class="stat-box">
                     <i class="fas fa-car"></i>
@@ -59,11 +60,33 @@
                     <h3 id="occupancyRate">--</h3>
                     <p>Occupancy Rate</p>
                 </div>
-                <!-- NEW: Gas Stat Box -->
+            </div>
+
+            <!-- Row 2: Sensor Stats -->
+            <div class="stats-grid sensor-stats-grid">
+                <!-- Gas Stat Box -->
                 <div class="stat-box gas-box" id="gasStatBox">
                     <i class="fas fa-wind"></i>
-                    <h3 id="gasPPM">85 PPM</h3>
+                    <h3 id="gasPPM">-- PPM</h3>
                     <p>Air Quality</p>
+                </div>
+                <!-- Distance Stat Box -->
+                <div class="stat-box distance-box" id="distanceStatBox">
+                    <i class="fas fa-ruler"></i>
+                    <h3 id="distanceValue">-- cm</h3>
+                    <p>Ultrasonic Distance</p>
+                </div>
+                <!-- Buzzer Status Box -->
+                <div class="stat-box buzzer-box" id="buzzerStatBox">
+                    <i class="fas fa-volume-mute" id="buzzerIcon"></i>
+                    <h3 id="buzzerValue">SILENT</h3>
+                    <p>Buzzer Alarm</p>
+                </div>
+                <!-- Gate Status Box -->
+                <div class="stat-box gate-box" id="gateStatBox">
+                    <i class="fas fa-door-closed" id="gateIcon"></i>
+                    <h3 id="gateValue">CLOSED</h3>
+                    <p>Entry Gate</p>
                 </div>
             </div>
 
@@ -74,7 +97,7 @@
                         <canvas id="occupancyChart"></canvas>
                     </div>
                 </div>
-                <!-- NEW: Gas Trend Chart -->
+                <!-- Gas Trend Chart -->
                 <div class="chart-container" id="gasChartContainer">
                     <h2>Air Quality Monitoring (PPM)</h2>
                     <div class="chart-box">
@@ -83,7 +106,7 @@
                 </div>
             </div>
 
-            <!-- AI Prediction Engine (inserted) -->
+            <!-- AI Prediction Engine -->
             <div class="chart-container prediction-card" id="predictionCard">
                 <h2>Predicted Occupancy (Next 10 Minutes)</h2>
                 <div class="prediction-body">
@@ -118,7 +141,7 @@
                 </div>
             </div>
 
-            <!-- NEW: Gas Monitoring Section -->
+            <!-- Gas Monitoring Section -->
             <section class="gas-monitoring">
                 <div class="gas-gauge-card">
                     <h3>Gas Sensor (MQ-2)</h3>
@@ -135,7 +158,7 @@
                             <circle cx="60" cy="60" r="44" fill="#0f172a" stroke="rgba(255,255,255,0.04)" stroke-width="6" />
                             <circle id="gaugeTrack" cx="60" cy="60" r="44" fill="transparent" stroke="#222831" stroke-width="6" />
                             <circle id="gaugeProgress" cx="60" cy="60" r="44" fill="transparent" stroke="url(#gaugeGradient)" stroke-width="6" stroke-linecap="round" stroke-dasharray="0 400" transform="rotate(-90 60 60)" />
-                            <text id="gaugeValue" x="60" y="60" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="#f8fafc" font-weight="700">85 PPM</text>
+                            <text id="gaugeValue" x="60" y="60" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="#f8fafc" font-weight="700">-- PPM</text>
                         </svg>
                     </div>
                     <p class="gauge-status" id="gaugeStatus">Safe</p>

@@ -146,11 +146,73 @@ header h1 {
 
 /* Stats Grid */
 .stats-grid {
-    /* NEW: enforce 4 columns on desktop, wrap on smaller screens */
+    /* 4 columns on desktop, wrap on smaller screens */
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
     margin-bottom: 2rem;
+}
+
+/* Sensor Stats Grid (Row 2) */
+.sensor-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Distance stat box */
+.stat-box.distance-box {
+    background: var(--charcoal);
+    border-color: rgba(99, 102, 241, 0.5);
+}
+
+.stat-box.distance-box:hover {
+    border-color: #6366f1;
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3);
+}
+
+/* Buzzer stat box */
+.stat-box.buzzer-box {
+    background: var(--charcoal);
+    border-color: rgba(16, 185, 129, 0.5);
+    transition: all 0.4s ease;
+}
+
+.stat-box.buzzer-box:hover {
+    border-color: var(--success);
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.2);
+}
+
+.stat-box.buzzer-box.buzzer-active {
+    animation: buzzerPulse 1s infinite;
+}
+
+@keyframes buzzerPulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3); }
+    50% { box-shadow: 0 8px 40px rgba(239, 68, 68, 0.6); }
+}
+
+/* Gate stat box */
+.stat-box.gate-box {
+    background: var(--charcoal);
+    border-color: rgba(239, 68, 68, 0.5);
+    transition: all 0.4s ease;
+}
+
+.stat-box.gate-box:hover {
+    border-color: var(--danger);
+    box-shadow: 0 8px 30px rgba(239, 68, 68, 0.2);
+}
+
+.stat-box.gate-box.gate-open {
+    border-color: rgba(16, 185, 129, 0.8);
+}
+
+.stat-box.gate-box.gate-open:hover {
+    border-color: var(--success);
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.3);
+}
+
+.stat-box.gate-box.gate-closed {
+    border-color: rgba(239, 68, 68, 0.5);
 }
 
 /* NEW: Gas stat box gradients (will be switched dynamically via JS) */
@@ -311,6 +373,10 @@ header h1 {
 /* Mobile adjustments: stats 2 columns, preserve responsive behavior */
 @media (max-width: 768px) {
     .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .sensor-stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 
@@ -642,7 +708,8 @@ header h1 {
         max-height: 240px !important;
     }
     
-    .stats-grid {
+    .stats-grid,
+    .sensor-stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
     
